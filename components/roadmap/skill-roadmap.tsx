@@ -27,6 +27,13 @@ type SkillNodeData = {
   completed: boolean;
 };
 
+type AuthUser = {
+  email: string;
+  image: string | null;
+  name: string;
+  provider: "oauth";
+};
+
 type LevelNodeData = {
   label: string;
 };
@@ -115,11 +122,13 @@ function buildEdges(skills: Skill[]): Edge[] {
 }
 
 export function SkillRoadmap({
+  authUser,
   skills,
   paths,
   resources,
   certifications,
 }: {
+  authUser: AuthUser | null;
   skills: Skill[];
   paths: LearningPath[];
   resources: Resource[];
@@ -132,12 +141,21 @@ export function SkillRoadmap({
   const [pathId, setPathId] = React.useState("all");
   const [user, setUser] = React.useState<LocalUser | null>(null);
   const [progress, setProgress] = React.useState<Record<string, string[]>>({});
+  const [newsletterOptIn, setNewsletterOptIn] = React.useState(false);
 
   React.useEffect(() => {
-    const storedUser = readLocalUser();
+    const storedUser = authUser
+      ? {
+          email: authUser.email,
+          image: authUser.image,
+          name: authUser.name,
+          provider: "oauth" as const,
+        }
+      : readLocalUser();
     setUser(storedUser);
     setProgress(storedUser ? readProgress(storedUser.email) : {});
-  }, []);
+    setNewsletterOptIn(storedUser ? readNewsletterOptIn(storedUser.email) : false);
+  }, [authUser]);
 
   const completedSkillIds = React.useMemo(() => {
     return new Set(
@@ -256,14 +274,33 @@ export function SkillRoadmap({
       <aside className="space-y-4">
         <ProgressPanel
           completedCount={completedSkillIds.size}
+          newsletterOptIn={newsletterOptIn}
           onLogin={(nextUser) => {
             setUser(nextUser);
             setProgress(readProgress(nextUser.email));
+            setNewsletterOptIn(readNewsletterOptIn(nextUser.email));
           }}
           onLogout={() => {
+            if (user?.provider === "oauth") {
+              window.location.href = "/sign-out";
+              return;
+            }
             window.localStorage.removeItem(USER_STORAGE_KEY);
             setUser(null);
             setProgress({});
+            setNewsletterOptIn(false);
+          }}
+          onNewsletterToggle={async (checked) => {
+            if (!user) return;
+            setNewsletterOptIn(checked);
+            writeNewsletterOptIn(user.email, checked);
+            if (checked) {
+              await fetch("/api/newsletter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: user.email, name: user.name, source: "roadmap-progress" }),
+              });
+            }
           }}
           totalCount={skills.length}
           user={user}
@@ -314,8 +351,10 @@ export function SkillRoadmap({
 }
 
 type LocalUser = {
+  image?: string | null;
   name: string;
   email: string;
+  provider?: "local" | "oauth";
 };
 
 const USER_STORAGE_KEY = "skill-graph-user";
@@ -342,16 +381,28 @@ function writeProgress(email: string, progress: Record<string, string[]>) {
   window.localStorage.setItem(`skill-graph-progress:${email}`, JSON.stringify(progress));
 }
 
+function readNewsletterOptIn(email: string) {
+  return window.localStorage.getItem(`skill-graph-newsletter:${email}`) === "true";
+}
+
+function writeNewsletterOptIn(email: string, value: boolean) {
+  window.localStorage.setItem(`skill-graph-newsletter:${email}`, String(value));
+}
+
 function ProgressPanel({
   completedCount,
+  newsletterOptIn,
   onLogin,
   onLogout,
+  onNewsletterToggle,
   totalCount,
   user,
 }: {
   completedCount: number;
+  newsletterOptIn: boolean;
   onLogin: (user: LocalUser) => void;
   onLogout: () => void;
+  onNewsletterToggle: (checked: boolean) => void;
   totalCount: number;
   user: LocalUser | null;
 }) {
@@ -367,7 +418,7 @@ function ProgressPanel({
             <UserRound className="h-4 w-4 text-primary" aria-hidden />
             Tu avance
           </CardTitle>
-          <CardDescription>{user.name} · {user.email}</CardDescription>
+          <CardDescription>{user.name} · {user.email} · {user.provider === "oauth" ? "OAuth" : "local"}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="h-2 overflow-hidden rounded-full bg-secondary">
@@ -377,9 +428,13 @@ function ProgressPanel({
             <span>{completedCount} de {totalCount} skills completos</span>
             <span>{percentage}%</span>
           </div>
+          <label className="flex items-start gap-2 rounded-md bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+            <input checked={newsletterOptIn} className="mt-1 h-4 w-4 accent-primary" onChange={(event) => onNewsletterToggle(event.target.checked)} type="checkbox" />
+            <span>Quiero recibir noticias sobre nuevas rutas de aprendizaje en este correo.</span>
+          </label>
           <Button className="w-full" onClick={onLogout} variant="outline">
             <LogOut className="h-4 w-4" aria-hidden />
-            Cerrar sesión local
+            {user.provider === "oauth" ? "Cerrar sesión" : "Cerrar sesión local"}
           </Button>
         </CardContent>
       </Card>
@@ -391,18 +446,27 @@ function ProgressPanel({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <LockKeyhole className="h-4 w-4 text-primary" aria-hidden />
-          Registro local
+          Guarda tu progreso
         </CardTitle>
-        <CardDescription>Guarda checks de avance en este navegador. TODO: migrar a Auth.js + base de datos.</CardDescription>
+        <CardDescription>Ingresa con OAuth o usa modo local para demos. TODO: persistir progreso en PostgreSQL.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        <Button asChild className="w-full">
+          <a href="/sign-in">
+            <LockKeyhole className="h-4 w-4" aria-hidden />
+            Ingresar con Google, GitHub o LinkedIn
+          </a>
+        </Button>
+        <div className="relative py-1 text-center text-xs text-muted-foreground">
+          <span className="bg-card px-2">o prueba modo local</span>
+        </div>
         <input className="h-10 w-full rounded-md border bg-background px-3 text-sm" onChange={(event) => setName(event.target.value)} placeholder="Nombre" value={name} />
         <input className="h-10 w-full rounded-md border bg-background px-3 text-sm" onChange={(event) => setEmail(event.target.value)} placeholder="Email" type="email" value={email} />
         <Button
           className="w-full"
           disabled={!name.trim() || !email.includes("@")}
           onClick={() => {
-            const nextUser = { name: name.trim(), email: email.trim().toLowerCase() };
+            const nextUser = { name: name.trim(), email: email.trim().toLowerCase(), provider: "local" as const };
             window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser));
             onLogin(nextUser);
           }}
