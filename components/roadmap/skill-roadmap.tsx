@@ -57,6 +57,7 @@ const tieredLayout: Record<string, { x: number; y: number }> = {
   "prompt-engineering": { x: 940, y: 40 },
   "ai-product-discovery": { x: 1240, y: 40 },
   "ai-ux-research-design": { x: 1540, y: 40 },
+  "agentic-ai-foundations": { x: 1840, y: 40 },
   "backend-ai": { x: 40, y: 330 },
   embeddings: { x: 340, y: 330 },
   "vector-databases": { x: 640, y: 330 },
@@ -64,11 +65,14 @@ const tieredLayout: Record<string, { x: number; y: number }> = {
   "ai-safety": { x: 1240, y: 330 },
   "frontend-ai-interfaces": { x: 1540, y: 330 },
   "ai-delivery-leadership": { x: 1840, y: 330 },
+  "agent-architecture-sdlc": { x: 2140, y: 330 },
+  "agent-tooling-mcp-runtime": { x: 2440, y: 330 },
   "agents-mcp": { x: 340, y: 620 },
   llmops: { x: 640, y: 620 },
   "cloud-ai": { x: 940, y: 620 },
   "ai-architectures": { x: 1240, y: 620 },
   "ai-governance-change": { x: 1540, y: 620 },
+  "agentic-governance-ops": { x: 1840, y: 620 },
 };
 
 function SkillNode({ data }: NodeProps<Node<SkillNodeData>>) {
