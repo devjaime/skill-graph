@@ -35,6 +35,7 @@ if (process.env.AUTH_LINKEDIN_ID && process.env.AUTH_LINKEDIN_SECRET) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
+  secret: process.env.AUTH_SECRET ?? "skill-graph-local-dev-secret-change-in-vercel",
   session: {
     strategy: "jwt",
   },
