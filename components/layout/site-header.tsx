@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { GitBranch, Map, Trophy, FlaskConical } from "lucide-react";
+import { Bot, GitBranch, Map, Trophy, FlaskConical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 
 const navItems = [
   { href: "/roadmap", label: "Roadmap", icon: Map },
+  { href: "/agent", label: "Agente", icon: Bot },
   { href: "/certifications", label: "Certificaciones", icon: Trophy },
   { href: "/playground", label: "Playground", icon: FlaskConical },
 ];

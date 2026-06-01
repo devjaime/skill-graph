@@ -48,3 +48,17 @@ AUTH_LINKEDIN_SECRET=
 Sin estas variables, el deploy sigue funcionando en modo MVP/local.
 
 El progreso se guarda actualmente en `localStorage` asociado al correo autenticado o local. La persistencia multi-dispositivo queda preparada como siguiente paso con PostgreSQL.
+
+## Agente De Rutas
+
+La ruta `/agent` expone un agente conversacional para recomendar rutas de aprendizaje, ejercicios y certificaciones.
+
+Variables opcionales:
+
+```bash
+MINIMAX_API_KEY=
+MINIMAX_BASE_URL=https://api.minimax.io/v1
+MINIMAX_MODEL=MiniMax-M2.7
+```
+
+Sin `MINIMAX_API_KEY`, el agente responde en modo fallback con RAG local sobre `lib/mock-data.ts`. La capa `lib/agent-rag.ts` está preparada para migrar a Chroma, pgvector u otra base vectorial HTTP-friendly para Vercel.
