@@ -1,5 +1,17 @@
 import Link from "next/link";
-import { ArrowRight, BrainCircuit, CheckCircle2, Database, GitBranch, ServerCog } from "lucide-react";
+import {
+  ArrowRight,
+  BrainCircuit,
+  BriefcaseBusiness,
+  Calculator,
+  CheckCircle2,
+  Database,
+  GitBranch,
+  Home,
+  Scale,
+  ServerCog,
+  Sparkles,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +31,37 @@ const futureItems = [
   "Auth.js / NextAuth para guardar progreso",
   "Ollama y embeddings open-source",
   "Jobs semanales con GitHub Actions",
+];
+
+const careerConversions = [
+  {
+    title: "Abogados → Legal AI Strategist",
+    icon: Scale,
+    signal: "Contratos, compliance, investigación legal",
+    firstStep: "Aprender RAG, evaluación de fuentes y prompt injection",
+    outcome: "Diseñar asistentes legales con citas, trazabilidad y revisión humana",
+  },
+  {
+    title: "Contadores → AI Finance Ops",
+    icon: Calculator,
+    signal: "Reportes, conciliación, auditoría, impuestos",
+    firstStep: "Automatizar clasificación documental y validación de respuestas",
+    outcome: "Crear flujos IA para análisis financiero, alertas y revisión contable",
+  },
+  {
+    title: "Corredores de propiedades → PropTech AI Advisor",
+    icon: Home,
+    signal: "Captación, tasación, leads, documentación",
+    firstStep: "Usar agentes para seguimiento comercial y búsqueda semántica",
+    outcome: "Construir experiencias de recomendación, scoring y prospección asistida",
+  },
+  {
+    title: "RR.HH. / Operaciones → AI Process Lead",
+    icon: BriefcaseBusiness,
+    signal: "Procesos, capacitación, SOPs, gestión interna",
+    firstStep: "Mapear casos de uso, riesgos y métricas de adopción",
+    outcome: "Liderar automatización responsable con agentes y gobernanza",
+  },
 ];
 
 export default function HomePage() {
@@ -87,6 +130,58 @@ export default function HomePage() {
               <span>{item}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="overflow-hidden border-b bg-background/70">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <Badge variant="amber">Nuevas conversiones profesionales</Badge>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold leading-tight tracking-normal lg:text-[2.35rem]">
+              La IA también abre rutas para carreras fuera de tecnología.
+            </h2>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+              Abogados, contadores, corredores de propiedades y líderes operacionales pueden avanzar hacia roles de IA aplicada sin partir desde ingeniería de software.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button asChild>
+                <Link href="/agent">
+                  Diseñar mi ruta con el agente
+                  <Sparkles className="h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/roadmap">
+                  Ver roadmap completo
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="career-conversion-panel">
+            {careerConversions.map((career, index) => (
+              <article className="career-conversion-card" key={career.title} style={{ animationDelay: `${index * 120}ms` }}>
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border bg-primary/10 text-primary">
+                    <career.icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold leading-5">{career.title}</h3>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{career.signal}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 text-xs leading-5">
+                  <p className="rounded-md bg-secondary/45 px-3 py-2">
+                    <span className="text-primary">Primer paso:</span> {career.firstStep}
+                  </p>
+                  <p className="rounded-md bg-secondary/45 px-3 py-2">
+                    <span className="text-accent">Meta:</span> {career.outcome}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
